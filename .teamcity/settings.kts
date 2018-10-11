@@ -32,13 +32,15 @@ project {
 
     jdks.forEach {
         println(it)
-        buildType(createBuild(it))
+        buildType(createBuild(jdk = it))
     }
 }
 
+
 fun createBuild(jdk: String): BuildType {
-    return BuildType({
-        name = "Build with - $jdk"
+    return BuildType {
+        this.name = "Build with - $jdk"
+        this.id = RelativeId(relativeId = jdk)
         vcs {
             root(DslContext.settingsRoot)
         }
@@ -57,5 +59,5 @@ fun createBuild(jdk: String): BuildType {
             vcs {
             }
         }
-    })
+    }
 }
