@@ -29,6 +29,7 @@ version = "2018.1"
 project {
 
     buildType(Build)
+	buildType(Build11)
 }
 
 object Build : BuildType({
@@ -44,6 +45,29 @@ object Build : BuildType({
             runnerArgs = "-Dmaven.test.failure.ignore=true"
             mavenVersion = defaultProvidedVersion()
             dockerImage = "svenruppert/maven-3.5-jdk-openjdk-10"
+            param("teamcity.tool.jacoco", "%teamcity.tool.jacoco.DEFAULT%")
+        }
+    }
+
+    triggers {
+        vcs {
+        }
+    }
+})
+
+object Build11 : BuildType({
+    name = "Build openjdk-11"
+
+    vcs {
+        root(DslContext.settingsRoot)
+    }
+
+    steps {
+        maven {
+            goals = "clean test"
+            runnerArgs = "-Dmaven.test.failure.ignore=true"
+            mavenVersion = defaultProvidedVersion()
+            dockerImage = "svenruppert/maven-3.5-jdk-openjdk-11"
             param("teamcity.tool.jacoco", "%teamcity.tool.jacoco.DEFAULT%")
         }
     }
