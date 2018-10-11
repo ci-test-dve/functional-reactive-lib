@@ -43,7 +43,9 @@ fun createBuild(jdk: String): BuildType {
         this.id = RelativeId(relativeId = jdk.replace(
                 oldValue = "/",
                 newValue = "_"
-        ))
+        ).replace(
+                oldValue = "-",
+                newValue = "_"))
         vcs {
             root(DslContext.settingsRoot)
         }
