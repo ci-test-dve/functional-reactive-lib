@@ -40,7 +40,10 @@ project {
 fun createBuild(jdk: String): BuildType {
     return BuildType {
         this.name = "Build with - $jdk"
-        this.id = RelativeId(relativeId = jdk)
+        this.id = RelativeId(relativeId = jdk.replace(
+                oldValue = "/",
+                newValue = "_"
+        ))
         vcs {
             root(DslContext.settingsRoot)
         }
