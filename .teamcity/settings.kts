@@ -28,52 +28,34 @@ version = "2018.1"
 
 project {
 
-    buildType(Build)
-	buildType(Build11)
+    val jdks = listOf("svenruppert/maven-3.5-jdk-openjdk-10", "svenruppert/maven-3.5-jdk-openjdk-11")
+
+    jdks.forEach { buildType(createBuild(it)) }
+
 }
 
-object Build : BuildType({
-    name = "Build"
+fun createBuild(jdk: String): BuildType {
+    val buildType = BuildType({
+        name = "Build with - $jdk"
 
-    vcs {
-        root(DslContext.settingsRoot)
-    }
-
-    steps {
-        maven {
-            goals = "clean test"
-            runnerArgs = "-Dmaven.test.failure.ignore=true"
-            mavenVersion = defaultProvidedVersion()
-            dockerImage = "svenruppert/maven-3.5-jdk-openjdk-10"
-            param("teamcity.tool.jacoco", "%teamcity.tool.jacoco.DEFAULT%")
-        }
-    }
-
-    triggers {
         vcs {
+            root(DslContext.settingsRoot)
         }
-    }
-})
 
-object Build11 : BuildType({
-    name = "Build openjdk-11"
-
-    vcs {
-        root(DslContext.settingsRoot)
-    }
-
-    steps {
-        maven {
-            goals = "clean test"
-            runnerArgs = "-Dmaven.test.failure.ignore=true"
-            mavenVersion = defaultProvidedVersion()
-            dockerImage = "svenruppert/maven-3.5-jdk-openjdk-11"
-            param("teamcity.tool.jacoco", "%teamcity.tool.jacoco.DEFAULT%")
+        steps {
+            maven {
+                goals = "clean test"
+                runnerArgs = "-Dmaven.test.failure.ignore=true"
+                mavenVersion = defaultProvidedVersion()
+                dockerImage = jdk
+                param("teamcity.tool.jacoco", "%teamcity.tool.jacoco.DEFAULT%")
+            }
         }
-    }
 
-    triggers {
-        vcs {
+        triggers {
+            vcs {
+            }
         }
-    }
-})
+    })
+    return buildType
+}
