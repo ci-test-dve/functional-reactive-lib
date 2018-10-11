@@ -28,7 +28,16 @@ version = "2018.1"
 
 project {
 
-    val jdks = listOf("svenruppert/maven-3.5-jdk-openjdk-10", "svenruppert/maven-3.5-jdk-openjdk-11")
+    val jdks = listOf(
+            "svenruppert/maven-3.5-jdk-openjdk-10",
+            "svenruppert/maven-3.5-jdk-openjdk-11",
+            "svenruppert/maven-3.5-jdk-oracle-08",
+            "svenruppert/maven-3.5-jdk-oracle-10",
+            "svenruppert/maven-3.5-jdk-zulu-08",
+            "svenruppert/maven-3.5-jdk-zulu-10",
+            "svenruppert/maven-3.5-jdk-zulu-11",
+            "svenruppert/maven-3.5-jdk-graalvm-ce-01"
+    )
 
     jdks.forEach {
         println(it)
