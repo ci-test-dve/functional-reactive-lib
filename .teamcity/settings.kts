@@ -30,32 +30,32 @@ project {
 
     val jdks = listOf("svenruppert/maven-3.5-jdk-openjdk-10", "svenruppert/maven-3.5-jdk-openjdk-11")
 
-    jdks.forEach { buildType(createBuild(it)) }
+    jdks.forEach {
+        buildType(
+                object : BuildType({
+                    name = "Build with - $it"
+
+                    vcs {
+                        root(DslContext.settingsRoot)
+                    }
+
+                    steps {
+                        maven {
+                            goals = "clean test"
+                            runnerArgs = "-Dmaven.test.failure.ignore=true"
+                            mavenVersion = defaultProvidedVersion()
+                            dockerImage = it
+                            param("teamcity.tool.jacoco", "%teamcity.tool.jacoco.DEFAULT%")
+                        }
+                    }
+
+                    triggers {
+                        vcs {
+                        }
+                    }
+                })
+        )
+    }
 
 }
 
-fun createBuild(jdk: String): BuildType {
-    val buildType = BuildType({
-        name = "Build with - $jdk"
-
-        vcs {
-            root(DslContext.settingsRoot)
-        }
-
-        steps {
-            maven {
-                goals = "clean test"
-                runnerArgs = "-Dmaven.test.failure.ignore=true"
-                mavenVersion = defaultProvidedVersion()
-                dockerImage = jdk
-                param("teamcity.tool.jacoco", "%teamcity.tool.jacoco.DEFAULT%")
-            }
-        }
-
-        triggers {
-            vcs {
-            }
-        }
-    })
-    return buildType
-}
