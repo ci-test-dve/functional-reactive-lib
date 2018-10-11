@@ -40,7 +40,6 @@ project {
     )
 
     jdks.forEach {
-        println(it)
         buildType(createBuild(jdk = it))
     }
 }
