@@ -36,13 +36,41 @@ project {
             "svenruppert/maven-3.5-jdk-zulu-11"
     )
 
+
+    val dockerMavenBuildTemplate = Template {
+        id("MavenDocker")
+        name = "MavenDockerBuild"
+
+        vcs {
+            root(DslContext.settingsRoot)
+        }
+
+        steps {
+            maven {
+                goals = "clean test"
+                runnerArgs = "-Dmaven.test.failure.ignore=true"
+                mavenVersion = defaultProvidedVersion()
+                dockerImage = "%dockerImageName%"
+                param("teamcity.tool.jacoco", "%teamcity.tool.jacoco.DEFAULT%")
+
+            }
+        }
+
+        triggers {
+            vcs {
+            }
+        }
+    }
+
+    template(dockerMavenBuildTemplate)
+
     jdks.forEach {
-        buildType(createBuild(jdk = it))
+        buildType(createBuild(jdk = it, template = dockerMavenBuildTemplate))
     }
 }
 
 
-fun createBuild(jdk: String): BuildType {
+fun createBuild(jdk: String, template: Template): BuildType {
     return BuildType {
         this.name = "Build with - $jdk"
         this.id = RelativeId(relativeId = jdk.substringAfter("/")
@@ -55,24 +83,9 @@ fun createBuild(jdk: String): BuildType {
                 .replace(
                         oldValue = ".",
                         newValue = "_"))
-        vcs {
-            root(DslContext.settingsRoot)
-        }
-
-        steps {
-            maven {
-                goals = "clean test"
-                runnerArgs = "-Dmaven.test.failure.ignore=true"
-                mavenVersion = defaultProvidedVersion()
-                dockerImage = jdk
-                param("teamcity.tool.jacoco", "%teamcity.tool.jacoco.DEFAULT%")
-
-            }
-        }
-
-        triggers {
-            vcs {
-            }
+        templates(template)
+        params{
+            param("dockerImageName", jdk)
         }
     }
 }
