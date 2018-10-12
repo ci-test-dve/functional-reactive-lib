@@ -31,12 +31,9 @@ project {
     val jdks = listOf(
             "svenruppert/maven-3.5-jdk-openjdk-10",
             "svenruppert/maven-3.5-jdk-openjdk-11",
-            "svenruppert/maven-3.5-jdk-oracle-08",
             "svenruppert/maven-3.5-jdk-oracle-10",
-            "svenruppert/maven-3.5-jdk-zulu-08",
             "svenruppert/maven-3.5-jdk-zulu-10",
-            "svenruppert/maven-3.5-jdk-zulu-11",
-            "svenruppert/maven-3.5-jdk-graalvm-ce-01"
+            "svenruppert/maven-3.5-jdk-zulu-11"
     )
 
     jdks.forEach {
@@ -69,6 +66,7 @@ fun createBuild(jdk: String): BuildType {
                 mavenVersion = defaultProvidedVersion()
                 dockerImage = jdk
                 param("teamcity.tool.jacoco", "%teamcity.tool.jacoco.DEFAULT%")
+
             }
         }
 
