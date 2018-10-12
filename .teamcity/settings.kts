@@ -1,6 +1,7 @@
 import jetbrains.buildServer.configs.kotlin.v2018_1.*
 import jetbrains.buildServer.configs.kotlin.v2018_1.buildSteps.maven
 import jetbrains.buildServer.configs.kotlin.v2018_1.triggers.vcs
+import java.lang.IllegalArgumentException
 
 /*
 The settings script is an entry point for defining a TeamCity
@@ -62,12 +63,15 @@ project {
 
     template(dockerMavenBuildTemplate)
 
+    val builds: MutableMap<String, BuildType> = mutableMapOf()
     jdks.forEach {
-        buildType(
-                createBuild(jdk = it,
-                        template = dockerMavenBuildTemplate,
-                        prefix = "build",
-                        mavenGoals = "clean install"))
+        val build = createBuild(jdk = it,
+                template = dockerMavenBuildTemplate,
+                prefix = "build",
+                mavenGoals = "clean install")
+        buildType(build)
+        builds.put(it,
+                build)
     }
 
     val mutationTests = createBuild(
@@ -76,7 +80,10 @@ project {
             "mutation",
             "clean package org.pitest:pitest-maven:mutationCoverage"
     )
+    val buildType: BuildType = builds.get("svenruppert/maven-3.5-jdk-openjdk-10")
+            ?: throw IllegalArgumentException("not found")
 
+    mutationTests.dependencies { snapshot(buildType) {} }
     buildType(mutationTests)
 }
 
