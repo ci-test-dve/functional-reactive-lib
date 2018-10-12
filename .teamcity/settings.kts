@@ -74,7 +74,7 @@ project {
             "svenruppert/maven-3.5-jdk-openjdk-10",
             dockerMavenBuildTemplate,
             "mutation",
-            "mvn clean package org.pitest:pitest-maven:mutationCoverage"
+            "clean package org.pitest:pitest-maven:mutationCoverage"
     )
 
     buildType(mutationTests)
