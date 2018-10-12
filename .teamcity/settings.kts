@@ -36,7 +36,6 @@ project {
             "svenruppert/maven-3.5-jdk-zulu-11"
     )
 
-
     val dockerMavenBuildTemplate = Template {
         id("MavenDocker")
         name = "MavenDockerBuild"
@@ -47,12 +46,11 @@ project {
 
         steps {
             maven {
-                goals = "clean test"
+                goals = "%mavenGoals%"
                 runnerArgs = "-Dmaven.test.failure.ignore=true"
                 mavenVersion = defaultProvidedVersion()
                 dockerImage = "%dockerImageName%"
                 param("teamcity.tool.jacoco", "%teamcity.tool.jacoco.DEFAULT%")
-
             }
         }
 
@@ -65,15 +63,28 @@ project {
     template(dockerMavenBuildTemplate)
 
     jdks.forEach {
-        buildType(createBuild(jdk = it, template = dockerMavenBuildTemplate))
+        buildType(
+                createBuild(jdk = it,
+                        template = dockerMavenBuildTemplate,
+                        prefix = "build",
+                        mavenGoals = "clean install"))
     }
+
+    val mutationTests = createBuild(
+            "svenruppert/maven.3.5-jdk-openjdk-10",
+            dockerMavenBuildTemplate,
+            "mutation",
+            "mvn clean package org.pitest:pitest-maven:mutationCoverage"
+    )
+
+    buildType(mutationTests)
 }
 
 
-fun createBuild(jdk: String, template: Template): BuildType {
+fun createBuild(jdk: String, template: Template, prefix: String, mavenGoals: String): BuildType {
     return BuildType {
         this.name = "Build with - $jdk"
-        this.id = RelativeId(relativeId = jdk.substringAfter("/")
+        this.id = RelativeId(relativeId = (prefix + jdk).substringAfter("/")
                 .replace(
                         oldValue = "/",
                         newValue = "_"
@@ -84,8 +95,9 @@ fun createBuild(jdk: String, template: Template): BuildType {
                         oldValue = ".",
                         newValue = "_"))
         templates(template)
-        params{
+        params {
             param("dockerImageName", jdk)
+            param("mavenGoals", mavenGoals)
         }
     }
 }
