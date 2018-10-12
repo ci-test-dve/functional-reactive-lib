@@ -84,7 +84,12 @@ project {
 fun createBuild(jdk: String, template: Template, prefix: String, mavenGoals: String): BuildType {
     return BuildType {
         this.name = "$mavenGoals - $jdk"
-        this.id = RelativeId(relativeId = jdk.substringAfter("/")
+
+        this.id = RelativeId(relativeId = (mavenGoals + jdk.substringAfter("/"))
+                .replace(
+                        oldValue = " ",
+                        newValue = ""
+                )
                 .replace(
                         oldValue = "/",
                         newValue = "_"
