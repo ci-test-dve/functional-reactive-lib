@@ -71,7 +71,7 @@ project {
     }
 
     val mutationTests = createBuild(
-            "svenruppert/maven.3.5-jdk-openjdk-10",
+            "svenruppert/maven-3.5-jdk-openjdk-10",
             dockerMavenBuildTemplate,
             "mutation",
             "mvn clean package org.pitest:pitest-maven:mutationCoverage"
@@ -106,3 +106,4 @@ fun createBuild(jdk: String, template: Template, prefix: String, mavenGoals: Str
         }
     }
 }
+
