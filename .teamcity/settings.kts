@@ -28,55 +28,35 @@ version = "2018.1"
 
 project {
 
-    val jdks = listOf(
-            "svenruppert/maven-3.5-jdk-openjdk-10",
-            "svenruppert/maven-3.5-jdk-openjdk-11",
-            "svenruppert/maven-3.5-jdk-oracle-10",
-            "svenruppert/maven-3.5-jdk-zulu-10",
-            "svenruppert/maven-3.5-jdk-zulu-11"
-    )
+    template(MavenDocker)
+}
 
-    val dockerMavenBuildTemplate = Template {
-        id("MavenDocker")
-        name = "MavenDockerBuild"
+object MavenDocker : Template({
+    name = "MavenDockerBuild"
 
+    vcs {
+        root(DslContext.settingsRoot)
+    }
+
+    steps {
+        maven {
+            id = "TEMPLATE_RUNNER_1"
+            goals = "%mavenGoals%"
+            runnerArgs = "-Dmaven.test.failure.ignore=true"
+            mavenVersion = defaultProvidedVersion()
+            dockerImage = "%dockerImageName%"
+            param("teamcity.tool.jacoco", "%teamcity.tool.jacoco.DEFAULT%")
+        }
+    }
+
+    triggers {
         vcs {
-            root(DslContext.settingsRoot)
-        }
-
-        steps {
-            maven {
-                goals = "%mavenGoals%"
-                runnerArgs = "-Dmaven.test.failure.ignore=true"
-                mavenVersion = defaultProvidedVersion()
-                dockerImage = "%dockerImageName%"
-                param("teamcity.tool.jacoco", "%teamcity.tool.jacoco.DEFAULT%")
-            }
-        }
-
-        triggers {
-            vcs {
-            }
+            id = "TEMPLATE_TRIGGER_1"
         }
     }
+})
 
-    template(dockerMavenBuildTemplate)
-
-    jdks.forEach {
-        buildType(
-                createBuild(jdk = it,
-                        template = dockerMavenBuildTemplate,
-                        prefix = "build",
-                        mavenGoals = "clean install"))
-    }
-
-    val mutationTests = createBuild(
-            "svenruppert/maven.3.5-jdk-openjdk-10",
-            dockerMavenBuildTemplate,
-            "mutation",
-            "mvn clean package org.pitest:pitest-maven:mutationCoverage"
-    )
-
+    buildType(mutationTests)
 /*    buildType(mutationTests)*/
 }
 
@@ -84,6 +64,7 @@ project {
 fun createBuild(jdk: String, template: Template, prefix: String, mavenGoals: String): BuildType {
     return BuildType {
         this.name = "$mavenGoals - $jdk"
+        this.id = RelativeId(relativeId = (prefix + jdk).substringAfter("/")
         this.id = RelativeId(relativeId = jdk.substringAfter("/")
                 .replace(
                         oldValue = "/",
