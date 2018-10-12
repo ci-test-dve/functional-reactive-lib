@@ -77,7 +77,7 @@ project {
             "mvn clean package org.pitest:pitest-maven:mutationCoverage"
     )
 
-/*    buildType(mutationTests)*/
+    buildType(mutationTests)
 }
 
 
@@ -85,7 +85,7 @@ fun createBuild(jdk: String, template: Template, prefix: String, mavenGoals: Str
     return BuildType {
         this.name = "$mavenGoals - $jdk"
 
-        this.id = RelativeId(relativeId = (mavenGoals + jdk.substringAfter("/"))
+        this.id = RelativeId(relativeId = (prefix + jdk.substringAfter("/"))
                 .replace(
                         oldValue = " ",
                         newValue = ""
